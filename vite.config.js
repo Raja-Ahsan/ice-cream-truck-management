@@ -17,4 +17,17 @@ export default defineConfig({
             ignored: ['**/storage/framework/views/**'],
         },
     },
+    build: {
+        rollupOptions: {
+            output: {
+                // Single vendor chunk to avoid circular chunk dependencies (react-dom ↔ react-vendor ↔ vendor)
+                manualChunks(id) {
+                    if (id.includes('node_modules')) {
+                        return 'vendor';
+                    }
+                },
+            },
+        },
+        chunkSizeWarningLimit: 900,
+    },
 });
