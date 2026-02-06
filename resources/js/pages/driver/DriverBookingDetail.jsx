@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { API_BASE } from '../../App';
+import { API_BASE } from '../../app';
 import axios from 'axios';
 
 const token = () => localStorage.getItem('driver_token');

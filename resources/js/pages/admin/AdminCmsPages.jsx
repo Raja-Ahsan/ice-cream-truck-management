@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { API_BASE } from '../../App';
+import { API_BASE } from '../../app';
 import axios from 'axios';
 
 function useAuth() {

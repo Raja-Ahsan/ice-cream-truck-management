@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import axios from 'axios';
-import { API_BASE } from '../App';
+import { API_BASE } from '../app';
 
 const stripePromise = (() => {
   const key = import.meta.env.VITE_STRIPE_KEY;

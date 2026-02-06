@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
-import { API_BASE } from '../../App';
+import { API_BASE } from '../../app';
 
 const SIDEBAR_COLLAPSED_KEY = 'driver_sidebar_collapsed';
 

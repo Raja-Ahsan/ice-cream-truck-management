@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { API_BASE } from '../../App';
+import { API_BASE } from '../../app';
 import axios from 'axios';
 import { subscribeLiveLocations, getEcho } from '../../echo';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
