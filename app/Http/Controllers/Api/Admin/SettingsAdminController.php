@@ -16,6 +16,8 @@ class SettingsAdminController extends Controller
             'site_title' => 'string|max:255',
             'site_tagline' => 'nullable|string|max:500',
             'site_logo' => 'nullable|string|max:500',
+            'header_logo' => 'nullable|string|max:500',
+            'footer_logo' => 'nullable|string|max:500',
             'site_favicon' => 'nullable|string|max:500',
             'site_email' => 'nullable|email',
             'site_phone' => 'nullable|string|max:50',
@@ -104,7 +106,23 @@ class SettingsAdminController extends Controller
         $request->validate(['file' => 'required|image|mimes:png,jpg,jpeg,svg|max:2048']);
         $path = $request->file('file')->store('settings', 'public');
         Setting::set('site_logo', Storage::url($path), false, 'general');
-        return response()->json(['url' => Storage::url($path), 'message' => 'Logo uploaded.']);
+        return response()->json(['url' => Storage::url($path), 'message' => 'Site logo uploaded.']);
+    }
+
+    public function uploadHeaderLogo(Request $request): JsonResponse
+    {
+        $request->validate(['file' => 'required|image|mimes:png,jpg,jpeg,svg|max:2048']);
+        $path = $request->file('file')->store('settings', 'public');
+        Setting::set('header_logo', Storage::url($path), false, 'general');
+        return response()->json(['url' => Storage::url($path), 'message' => 'Header logo uploaded.']);
+    }
+
+    public function uploadFooterLogo(Request $request): JsonResponse
+    {
+        $request->validate(['file' => 'required|image|mimes:png,jpg,jpeg,svg|max:2048']);
+        $path = $request->file('file')->store('settings', 'public');
+        Setting::set('footer_logo', Storage::url($path), false, 'general');
+        return response()->json(['url' => Storage::url($path), 'message' => 'Footer logo uploaded.']);
     }
 
     public function uploadFavicon(Request $request): JsonResponse

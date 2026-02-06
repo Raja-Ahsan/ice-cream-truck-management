@@ -50,6 +50,7 @@ class Booking extends Model
         'truck_id',
         'driver_id',
         'dispatched_at',
+        'arrived_at',
         'completed_at',
     ];
 
@@ -59,6 +60,7 @@ class Booking extends Model
             'event_date' => 'date',
             'total_amount' => 'decimal:2',
             'dispatched_at' => 'datetime',
+            'arrived_at' => 'datetime',
             'completed_at' => 'datetime',
         ];
     }

@@ -23,7 +23,11 @@ class User extends Authenticatable
         'password',
         'role',
         'phone',
+        'license',
+        'avatar',
     ];
+
+    protected $appends = ['avatar_url'];
 
     protected $hidden = [
         'password',
@@ -61,5 +65,13 @@ class User extends Authenticatable
     public function driverLocations()
     {
         return $this->hasMany(DriverLocation::class);
+    }
+
+    public function getAvatarUrlAttribute(): ?string
+    {
+        if (! $this->avatar) {
+            return null;
+        }
+        return asset('storage/'.$this->avatar);
     }
 }

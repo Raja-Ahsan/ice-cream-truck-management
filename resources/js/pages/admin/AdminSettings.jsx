@@ -99,18 +99,29 @@ export default function AdminSettings() {
       .finally(() => setSaving((s) => ({ ...s, [group]: false })));
   };
 
+  const logoEndpoints = {
+    site_logo: 'settings/upload-logo',
+    header_logo: 'settings/upload-header-logo',
+    footer_logo: 'settings/upload-footer-logo',
+    site_favicon: 'settings/upload-favicon',
+  };
+
   const uploadFile = (endpoint, file, groupKey) => {
     const fd = new FormData();
     fd.append('file', file);
-    setSaving((s) => ({ ...s, general: true }));
+    setSaving((s) => ({ ...s, [groupKey]: true }));
+    setError((e) => ({ ...e, general: null }));
     axios.post(`${API_BASE}/admin/${endpoint}`, fd, { headers: headers() })
       .then(({ data }) => {
         updateForm('general', groupKey, data.url);
+        setSettings((prev) => ({ ...prev, general: { ...(prev.general || {}), [groupKey]: data.url } }));
+        setForm((prev) => ({ ...prev, general: { ...(prev.general || {}), [groupKey]: data.url } }));
         setSuccess((s) => ({ ...s, general: true }));
         setTimeout(() => setSuccess((s) => ({ ...s, general: false })), 3000);
+        window.dispatchEvent(new Event('admin-settings-logos-updated'));
       })
       .catch((err) => setError((e) => ({ ...e, general: err.response?.data?.message || 'Upload failed.' })))
-      .finally(() => setSaving((s) => ({ ...s, general: false })));
+      .finally(() => setSaving((s) => ({ ...s, [groupKey]: false })));
   };
 
   const toggleReveal = (key) => setRevealed((r) => ({ ...r, [key]: !r[key] }));
@@ -121,9 +132,53 @@ export default function AdminSettings() {
   if (loading) return <div className="text-stone-600">Loading settings...</div>;
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto">
       <h1 className="mb-6 text-2xl font-bold text-stone-800">Admin Settings</h1>
       <p className="mb-6 text-sm text-stone-500">Super Admin only. Sensitive fields are masked; use Reveal to view.</p>
+
+      {/* Logos & Favicon — used across site and admin dashboard; uploads save immediately */}
+      <div className="mb-6 rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
+        <h2 className="mb-1 text-lg font-semibold text-stone-800">Logos & Favicon</h2>
+        <p className="mb-4 text-sm text-stone-500">Uploaded images are saved immediately and used across the public site and admin dashboard.</p>
+        {error.general && <p className="mb-2 text-sm text-red-600">{error.general}</p>}
+        {success.general && <p className="mb-2 text-sm text-green-600">Upload saved.</p>}
+        <div className="grid gap-6 sm:grid-cols-2">
+          {[
+            { key: 'site_logo', label: 'Site Logo', accept: '.png,.jpg,.jpeg,.svg', hint: 'Main logo (e.g. homepage)' },
+            { key: 'header_logo', label: 'Header Logo', accept: '.png,.jpg,.jpeg,.svg', hint: 'Logo in header/nav and admin sidebar' },
+            { key: 'footer_logo', label: 'Footer Logo', accept: '.png,.jpg,.jpeg,.svg', hint: 'Logo in footer' },
+            { key: 'site_favicon', label: 'Favicon', accept: '.ico,.png', hint: 'Browser tab icon' },
+          ].map(({ key, label, accept, hint }) => (
+            <div key={key} className="rounded-lg border border-stone-200 bg-stone-50/50 p-4">
+              <label className="mb-1 block text-sm font-medium text-stone-700">{label}</label>
+              <p className="mb-2 text-xs text-stone-500">{hint}</p>
+              <div className="flex flex-wrap items-center gap-3">
+                <input
+                  type="file"
+                  accept={accept}
+                  disabled={saving[key]}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) uploadFile(logoEndpoints[key], file, key);
+                    e.target.value = '';
+                  }}
+                  className="text-sm text-stone-600 file:mr-2 file:rounded-lg file:border-0 file:bg-amber-500 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-white file:hover:bg-amber-600"
+                />
+                {v('general', key) && (
+                  <span className="inline-flex items-center gap-2">
+                    {key === 'site_favicon' ? (
+                      <img src={v('general', key)} alt="Favicon" className="h-8 w-8 rounded border border-stone-200 object-contain" />
+                    ) : (
+                      <img src={v('general', key)} alt={label} className="h-10 max-w-[180px] rounded border border-stone-200 object-contain" />
+                    )}
+                  </span>
+                )}
+                {saving[key] && <span className="text-xs text-amber-600">Uploading…</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* General Site Settings */}
       <SectionCard
@@ -153,32 +208,6 @@ export default function AdminSettings() {
               placeholder="Tagline"
               className="w-full rounded-lg border border-stone-300 px-4 py-2 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
             />
-          </div>
-          <div className="sm:col-span-2">
-            <label className="mb-1 block text-sm font-medium text-stone-700">Site Logo (PNG, JPG, SVG)</label>
-            <div className="flex flex-wrap items-center gap-2">
-              <input
-                type="file"
-                accept=".png,.jpg,.jpeg,.svg"
-                onChange={(e) => e.target.files?.[0] && uploadFile('settings/upload-logo', e.target.files[0], 'site_logo')}
-                className="text-sm text-stone-600"
-              />
-              {v('general', 'site_logo') && (
-                <img src={v('general', 'site_logo')} alt="Logo" className="h-10 rounded border border-stone-200" />
-              )}
-            </div>
-          </div>
-          <div className="sm:col-span-2">
-            <label className="mb-1 block text-sm font-medium text-stone-700">Favicon (ICO, PNG)</label>
-            <input
-              type="file"
-              accept=".ico,.png"
-              onChange={(e) => e.target.files?.[0] && uploadFile('settings/upload-favicon', e.target.files[0], 'site_favicon')}
-              className="text-sm text-stone-600"
-            />
-            {v('general', 'site_favicon') && (
-              <img src={v('general', 'site_favicon')} alt="Favicon" className="mt-1 h-8 w-8" />
-            )}
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-stone-700">Site Email</label>

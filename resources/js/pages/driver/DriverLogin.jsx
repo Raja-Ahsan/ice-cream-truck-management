@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { API_BASE } from '../../App';
 import axios from 'axios';
 
-export default function AdminLogin() {
+export default function DriverLogin() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -17,15 +17,16 @@ export default function AdminLogin() {
     axios
       .post(`${API_BASE}/login`, { email, password })
       .then(({ data }) => {
-        if (data.user?.role !== 'admin') {
-          setError('Admin access only.');
+        if (data.user?.role !== 'driver') {
+          setError('Driver access only. Use the driver login.');
           return;
         }
-        localStorage.setItem('admin_token', data.token);
-        navigate('/admin');
+        localStorage.setItem('driver_token', data.token);
+        if (data.user?.name) localStorage.setItem('driver_name', data.user.name);
+        navigate('/driver');
       })
       .catch((err) => {
-        setError(err.response?.data?.message || 'Login failed.');
+        setError(err.response?.data?.message || err.response?.data?.errors?.email?.[0] || 'Login failed.');
       })
       .finally(() => setLoading(false));
   };
@@ -33,7 +34,7 @@ export default function AdminLogin() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-stone-100">
       <div className="w-full max-w-sm rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
-        <h1 className="mb-6 text-xl font-bold text-stone-800">Admin Login</h1>
+        <h1 className="mb-6 text-xl font-bold text-stone-800">Driver Login</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-stone-700">Email</label>

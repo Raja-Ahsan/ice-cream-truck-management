@@ -15,6 +15,7 @@ class TruckInventorySnapshotLine extends Model
         'quantity_assigned',
         'quantity_used',
         'quantity_remaining',
+        'quantity_waste',
     ];
 
     public function snapshot(): BelongsTo

@@ -9,6 +9,7 @@ Route::get('/user', function (Request $request) {
 
 // ----- Public (no auth) -----
 Route::prefix('v1')->group(function () {
+    Route::get('settings/public', [\App\Http\Controllers\Api\SettingsController::class, 'public']);
     Route::get('cms/pages', [\App\Http\Controllers\Api\CmsController::class, 'pages']);
     Route::get('cms/pages/{slug}', [\App\Http\Controllers\Api\CmsController::class, 'pageBySlug']);
     Route::get('packages', [\App\Http\Controllers\Api\PackageController::class, 'index']);
@@ -32,9 +33,12 @@ Route::prefix('v1/admin')->middleware(['auth:sanctum', 'role:admin'])->group(fun
     Route::get('bookings/{booking}', [\App\Http\Controllers\Api\Admin\BookingAdminController::class, 'show']);
     Route::put('bookings/{booking}/assign', [\App\Http\Controllers\Api\Admin\BookingAdminController::class, 'assign']);
     Route::put('bookings/{booking}/inventory-snapshot', [\App\Http\Controllers\Api\Admin\BookingAdminController::class, 'setInventorySnapshot']);
+    Route::put('bookings/{booking}/inventory-review', [\App\Http\Controllers\Api\Admin\BookingAdminController::class, 'inventoryReview']);
     Route::put('bookings/{booking}/dispatch', [\App\Http\Controllers\Api\Admin\BookingAdminController::class, 'dispatch']);
+    Route::get('inventory-review/pending', [\App\Http\Controllers\Api\Admin\BookingAdminController::class, 'inventoryReviewPending']);
     Route::get('trucks', [\App\Http\Controllers\Api\Admin\TruckAdminController::class, 'index']);
     Route::get('drivers', [\App\Http\Controllers\Api\Admin\DriverAdminController::class, 'index']);
+    Route::post('drivers', [\App\Http\Controllers\Api\Admin\DriverAdminController::class, 'store']);
     Route::get('live/locations', [\App\Http\Controllers\Api\Admin\LiveMapController::class, 'locations']);
     Route::apiResource('cms-pages', \App\Http\Controllers\Api\Admin\CmsPageAdminController::class);
     Route::apiResource('faqs', \App\Http\Controllers\Api\Admin\FaqAdminController::class);
@@ -42,14 +46,26 @@ Route::prefix('v1/admin')->middleware(['auth:sanctum', 'role:admin'])->group(fun
     Route::apiResource('packages', \App\Http\Controllers\Api\Admin\PackageAdminController::class);
     Route::apiResource('add-ons', \App\Http\Controllers\Api\Admin\AddOnAdminController::class);
     Route::apiResource('trucks', \App\Http\Controllers\Api\Admin\TruckAdminController::class)->except(['index']);
+    Route::post('trucks/{truck}/image', [\App\Http\Controllers\Api\Admin\TruckAdminController::class, 'uploadImage']);
+    Route::delete('trucks/{truck}/image', [\App\Http\Controllers\Api\Admin\TruckAdminController::class, 'removeImage']);
     Route::apiResource('inventory-products', \App\Http\Controllers\Api\Admin\InventoryProductAdminController::class);
+    Route::post('inventory-products/{inventory_product}/image', [\App\Http\Controllers\Api\Admin\InventoryProductAdminController::class, 'uploadImage']);
+    Route::delete('inventory-products/{inventory_product}/image', [\App\Http\Controllers\Api\Admin\InventoryProductAdminController::class, 'removeImage']);
+    Route::get('payments', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'index']);
+    Route::put('bookings/{booking}/payment-status', [\App\Http\Controllers\Api\Admin\PaymentAdminController::class, 'updatePaymentStatus']);
     Route::get('reports/bookings', [\App\Http\Controllers\Api\Admin\ReportController::class, 'bookings']);
     Route::get('reports/revenue', [\App\Http\Controllers\Api\Admin\ReportController::class, 'revenue']);
     Route::get('reports/export', [\App\Http\Controllers\Api\Admin\ReportController::class, 'export']);
     Route::get('settings', [\App\Http\Controllers\Api\Admin\SettingsAdminController::class, 'index']);
     Route::put('settings', [\App\Http\Controllers\Api\Admin\SettingsAdminController::class, 'update']);
     Route::post('settings/upload-logo', [\App\Http\Controllers\Api\Admin\SettingsAdminController::class, 'uploadLogo']);
+    Route::post('settings/upload-header-logo', [\App\Http\Controllers\Api\Admin\SettingsAdminController::class, 'uploadHeaderLogo']);
+    Route::post('settings/upload-footer-logo', [\App\Http\Controllers\Api\Admin\SettingsAdminController::class, 'uploadFooterLogo']);
     Route::post('settings/upload-favicon', [\App\Http\Controllers\Api\Admin\SettingsAdminController::class, 'uploadFavicon']);
+    Route::get('profile', [\App\Http\Controllers\Api\Admin\ProfileAdminController::class, 'show']);
+    Route::put('profile', [\App\Http\Controllers\Api\Admin\ProfileAdminController::class, 'update']);
+    Route::post('profile/avatar', [\App\Http\Controllers\Api\Admin\ProfileAdminController::class, 'uploadAvatar']);
+    Route::delete('profile/avatar', [\App\Http\Controllers\Api\Admin\ProfileAdminController::class, 'removeAvatar']);
 });
 
 // ----- Protected: Driver -----
@@ -60,4 +76,8 @@ Route::prefix('v1/driver')->middleware(['auth:sanctum', 'role:driver'])->group(f
     Route::post('bookings/{booking}/arrive', [\App\Http\Controllers\Api\Driver\DriverBookingController::class, 'arrive']);
     Route::post('bookings/{booking}/complete', [\App\Http\Controllers\Api\Driver\DriverBookingController::class, 'complete']);
     Route::post('location', [\App\Http\Controllers\Api\Driver\DriverLocationController::class, 'store']);
+    Route::get('profile', [\App\Http\Controllers\Api\Driver\ProfileDriverController::class, 'show']);
+    Route::put('profile', [\App\Http\Controllers\Api\Driver\ProfileDriverController::class, 'update']);
+    Route::post('profile/avatar', [\App\Http\Controllers\Api\Driver\ProfileDriverController::class, 'uploadAvatar']);
+    Route::delete('profile/avatar', [\App\Http\Controllers\Api\Driver\ProfileDriverController::class, 'removeAvatar']);
 });
